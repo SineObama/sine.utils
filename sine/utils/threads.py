@@ -40,7 +40,7 @@ class StoppableThread(threading.Thread):
 
         It check whether the target function can receive the event.
 
-        In non-strict mode, it try using 'kwargs' first, then 'args'.
+        In non-strict mode, it try using 'kwargs' first, or append to 'args'.
         It may replace the value in 'kwargs', 
         and do nothing when it is impossible to pass the event.
 
@@ -55,9 +55,9 @@ class StoppableThread(threading.Thread):
         if target != None:
             if kwargs == None:
                 kwargs = {}
-            spec = inspect.getargspec(target)
+            spec = inspect.getfullargspec(target)
             # if it is possible to pass the event
-            if spec.keywords != None or \
+            if spec.varkw != None or \
                     (len(spec.args) > len(args) and event_name in spec.args[len(args):]):
                 if strict and event_name in kwargs:
                     raise ValueError('the name \'' + event_name +
@@ -68,7 +68,7 @@ class StoppableThread(threading.Thread):
                 raise ValueError(
                     'impossible to pass the stop event (strict mode)')
             elif spec.varargs != None or len(spec.args) > len(args):
-                args = args + self._stop_event
+                args = (*args, self._stop_event)
         super(StoppableThread, self).__init__(group, target, name, args,
                                               kwargs, **kw)
         return

@@ -55,8 +55,6 @@ class Storage(object):
         self._lock = threading.RLock()
         self._data = {}
         self._recordCount = 0
-        self._file = None
-        self._writer = None
         self.logger = logger if logger else _logger
         if load:
             self.reload()
@@ -66,18 +64,10 @@ class Storage(object):
         '''重新从文件加载数据'''
         self._lock.acquire()
         try:
-            if self._file:
-                self._file.close()
-                self._file = None
-            try:
-                if os.path.isfile(self._filePath):
-                    self._readData(self._filePath)
-            finally:
-                if not os.path.exists(self._dirPath):
-                    os.makedirs(self._dirPath)
-                self._file = open(self._filePath, 'a', newline='',
-                                  encoding=self.encoding)
-                self._writer = csv.writer(self._file)
+            if not os.path.exists(self._dirPath):
+                os.makedirs(self._dirPath)
+            if os.path.isfile(self._filePath):
+                self._readData(self._filePath)
         finally:
             self._lock.release()
 
@@ -124,10 +114,6 @@ class Storage(object):
         3.用多次重命名文件的方式慎重地覆盖原文件'''
         self._lock.acquire()
         try:
-            if self._file:
-                self._file.close()
-                self._file = None
-
             # 1.写出到临时文件
             compName = self._filename + '.compress'
             compPath = self._dirPath.join(compName)
@@ -184,9 +170,11 @@ class Storage(object):
         '''更新一条数据'''
         self._lock.acquire()
         try:
-            self._writer.writerow(['1', 'u', key, item])
-            self._recordCount += 1
-            self._data[key] = item
+            with open(self._filePath, 'a', newline='', encoding=self.encoding) as file:
+                writer = csv.writer(file)
+                writer.writerow(['1', 'u', key, item])
+                self._recordCount += 1
+                self._data[key] = item
         finally:
             self._lock.release()
 
@@ -206,9 +194,11 @@ class Storage(object):
         try:
             if key not in self._data:
                 return
-            self._writer.writerow(['1', 'd', key])
-            self._recordCount += 1
-            del self._data[key]
+            with open(self._filePath, 'a', newline='', encoding=self.encoding) as file:
+                writer = csv.writer(file)
+                writer.writerow(['1', 'd', key])
+                self._recordCount += 1
+                del self._data[key]
         finally:
             self._lock.release()
 
@@ -234,11 +224,6 @@ class Storage(object):
 
     def __contains__(self, key):
         return key in self._data
-
-    def __del__(self):
-        if self._file:
-            self._file.close()
-        return
 
 
 __all__ = ['Storage']

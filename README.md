@@ -10,7 +10,7 @@ provide event sending and listening.
 use a hashable key to identify an event.
 
 ```python
-def f(data):
+def f(key, data):
     print data
 
 manager = EventManager()
@@ -18,7 +18,7 @@ manager.start() # start listen
 
 manager.addListener(key='evnet_key', listener=f)
 
-manager.sendEvent(key='evnet_key', data={msg:'hello'})
+manager.sendEvent(key='evnet_key', 'print hello')
 
 
 # other methods
@@ -106,22 +106,20 @@ differences with Java:
 ### Thread classes
 
 ```python
-from sine.threads import *
-
-def func(stop_event):
+def func(a, b, stop_event):
     while 1:
         if stop_event.is_set():
             break
         # do your work
 
-thread = StoppableThread(target=func)
+thread = StoppableThread(target=func, args=('a', 'b'))
 thread.start()
 # ...
 thread.stop(-1) # stop and join forever
 # thread.stopped() == True
 
 
-thread = ReStartableThread(target=func, event_name='stop_event') # can specify the parameter's name
+thread = ReStartableThread(target=func, args=('a', 'b'), event_name='stop_event') # can specify the parameter's name
 thread.start()
 # ...
 thread.stop(1) # stop and join for 1 second
@@ -161,7 +159,7 @@ storage.compress()
 
 ## Change Log
 
-### v0.1.0, 2019-7-20
+### v0.1.0, 2019-7-21
 
 collect from exist package:
 
@@ -170,4 +168,9 @@ collect from exist package:
 * sine.event-v0.0.2
 * sine.properties-v0.1.1
 
-and the new 'storage'
+and the new 'storage'.
+
+news:
+
+* EventManager: change arguments passing, include the key (just like calling the sendEvent)
+* threads: fix about args appending

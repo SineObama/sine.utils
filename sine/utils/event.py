@@ -13,21 +13,22 @@ class EventManager:
     可指定 logger 记录日志，否则默认使用 __name__ 的 logger 。
     '''
 
-    def __init__(self, logger=None):
+    def __init__(self, logger=None, eventBlockTime=0.1):
         self._eventQueue = Queue()
         self._listenThread = ReStartableThread(target=self._run)
         # 保存对应的事件的响应函数，每个键对应一个集合
         self._map = {}
+        self.eventBlockTime = eventBlockTime
         self.logger = logger if logger else logging.getLogger(__name__)
 
     def _run(self, stop_event):
         while not stop_event.is_set():
             try:
-                event = self._eventQueue.get(block=True, timeout=0.1)
+                event = self._eventQueue.get(block=True, timeout=self.eventBlockTime)
                 if stop_event.is_set():
                     return
-                self.logger.debug('process event. key=%s, data=%s' %
-                                  (str(event[0]), str(event[1])))
+                self.logger.info('process event. key=%s' %
+                                  (str(event[0])))
                 self._process(event)
             except Empty:
                 pass
@@ -37,10 +38,10 @@ class EventManager:
             for listener in self._map[event[0]]:
                 def sub(listener=listener):
                     try:
-                        listener(event[1])
+                        listener(event[0], *event[1], **event[2])
                     except Exception as e:
-                        self.logger.info('listener exception. listener=%s, exception=%s, event_key=%s, event_data=%s' %
-                                         (str(listener), str(e), str(event[0]), str(event[1])))
+                        self.logger.warn('listener exception. listener=%s, exception=%s, event_key=%s' %
+                                         (str(listener), str(e), str(event[0])))
                         raise
                 Thread(target=sub).start()
         except KeyError:
@@ -62,23 +63,23 @@ class EventManager:
         self._eventQueue.queue.clear()
 
     def addListener(self, key, listener):
-        self.logger.debug('add listener. key=%s, listener=%s' %
+        self.logger.info('add listener. key=%s, listener=%s' %
                           (str(key), str(listener)))
         self._map.setdefault(key, set()).add(listener)
 
     def removeListener(self, key, listener):
         try:
             self._map[key].remove(listener)
-            self.logger.debug('removed listener. key=%s, listener=%s' % (
+            self.logger.info('removed listener. key=%s, listener=%s' % (
                 str(key), str(listener)))
         except KeyError:
             pass
 
-    def sendEvent(self, key, data=None):
+    def sendEvent(self, key, *args, **kwargs):
         '''发布事件。以 key 标识；data 为数据，将会传给监听器。'''
-        self.logger.debug('send event. key=%s, data=%s' %
-                          (str(key), str(data)))
-        self._eventQueue.put((key, data))
+        self.logger.info('send event. key=%s' %
+                          (str(key)))
+        self._eventQueue.put((key, args, kwargs))
 
 
 __all__ = ['EventManager']

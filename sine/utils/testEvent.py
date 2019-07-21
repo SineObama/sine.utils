@@ -7,7 +7,7 @@ key = 'f'
 key2 = 'fff'
 
 
-def f(data):
+def f(event, data):
     global num
     num = data
 
