@@ -20,6 +20,7 @@ class EventManager:
         self._map = {}
         self.eventBlockTime = eventBlockTime
         self.logger = logger if logger else logging.getLogger(__name__)
+        self.setDaemon(True)
 
     def _run(self, stop_event):
         while not stop_event.is_set():
@@ -34,7 +35,7 @@ class EventManager:
                 pass
 
     def _process(self, event):
-        try:
+        if event[0] in self._map:
             for listener in self._map[event[0]]:
                 def sub(listener=listener):
                     try:
@@ -43,9 +44,14 @@ class EventManager:
                         self.logger.warn('listener exception. listener=%s, exception=%s, event_key=%s' %
                                          (str(listener), str(e), str(event[0])))
                         raise
-                Thread(target=sub).start()
-        except KeyError:
-            pass
+                thread = Thread(target=sub)
+                thread.setDaemon(self._daemon)
+                thread.start()
+
+    def setDaemon(self, daemon):
+        '''修改处理函数是否为守护线程'''
+        self._daemon = True if daemon else False
+        self.logger.info('daemon set to ' + str(self._daemon))
 
     def start(self):
         '''开始事件监听。'''

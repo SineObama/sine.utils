@@ -159,6 +159,10 @@ storage.compress()
 
 ## Change Log
 
+### v0.1.1, 2019-12-14
+
+* EventManager's process thread defaults to be daemon, can be set.
+
 ### v0.1.0, 2019-7-21
 
 collect from exist package:
