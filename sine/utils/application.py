@@ -11,8 +11,7 @@ class PredictableProcessBar(tqdm):
     loaded_total=0 # 已知的总进度数，对应tqdm.total
     loaded_avg=0 # 已知的平均大小
     updated_size=0 # 已完成进度的大小
-    updated_time=0 # 已完成进度的消耗时间(秒)
-    updated_rate=0 # 已完成进度的速度（大小除以时间）
+    updated_time=0 # 已完成进度的消耗时间(秒)由调用方给出
     origin_n=0 # 已完成的进度数，顶替tqdm.n的值，动态调整tqdm.n使其平滑
     lock=Lock() # 并发锁
     total_error=0.00001 # 进度完成时的判断误差（比值）
@@ -33,7 +32,6 @@ class PredictableProcessBar(tqdm):
         self.updated_size = self.updated_size + size
         self.origin_n = self.origin_n + total
         self.updated_time = self.updated_time + updated_time
-        self.updated_rate = self.updated_size / self.updated_time
         if self.loaded_total == 0:
             self.update(total)
         elif abs(self.origin_n - self.total) <= self.total * self.total_error:
