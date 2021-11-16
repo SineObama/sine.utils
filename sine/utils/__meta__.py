@@ -5,9 +5,12 @@
 #      ""b    88    88   i 88   88
 #  "booodP    88    88    i88   888888
 
-_VERSION = (0, 1, 1)
+_VERSION = (0, 2, 0)
 
 DESCRIPTION = 'the set of common tools'
 URL = 'https://github.com/SineObama/'
 VERSION = '.'.join(map(str, _VERSION))
-REQUIRED = []
+REQUIRED = [
+'config-file',
+'tqdm'
+]

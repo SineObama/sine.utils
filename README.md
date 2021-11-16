@@ -159,6 +159,12 @@ storage.compress()
 
 ## Change Log
 
+### v0.2.0, 2021-11-15
+
+* [new] class PredictableProcessBar
+* [new] class ConfigFileAlone
+* [new] functional: byte2readable, mkdir
+
 ### v0.1.1, 2019-12-14
 
 * EventManager's process thread defaults to be daemon, can be set.
