@@ -26,7 +26,7 @@ differences with Java:
 * store method will not write datetime comment
 '''
 
-from collections import Iterable
+from collections.abc import Iterable
 import os
 import re
 import sys

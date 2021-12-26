@@ -159,11 +159,12 @@ storage.compress()
 
 ## Change Log
 
-### v0.2.0, 2021-11-15
+### v0.2.0, 2021-12-26
 
 * [new] class PredictableProcessBar
 * [new] class ConfigFileAlone
 * [new] functional: byte2readable, mkdir
+* [fix] using collections.abc.Iterable
 
 ### v0.1.1, 2019-12-14
 
