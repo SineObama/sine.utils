@@ -80,7 +80,7 @@ class StoppableThread(threading.Thread):
         self._stop_event.set()
         if timeout != 0:
             self.join(timeout)
-        return self.isAlive()
+        return self.is_alive()
 
     def stopped(self):
         '''whether the stop event is set'''

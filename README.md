@@ -4,6 +4,48 @@ the set of common tools
 
 ## tools
 
+### Class ConfigFileAlone
+
+Simplify read/write on a Json config file. Based on module config_file.
+Main features:
+* Most used in single program to create and read from a local config file.
+* Specify your default config value in your code and then it will be add to the file. 
+* Don't worry about whether the file exists, and ONLY when config changed the file will be saved.
+
+```python
+try:
+    config = ConfigFileAlone('json_file_path')
+    save_path = config.getAlone('prop1', 'default')
+    api_path = config.getAlone('prop2', 2)
+    # ... your work
+    config.saveAlone()
+except Exception:
+    print("can not load config file")
+```
+
+### Class PredictableProcessBar
+Process bar just wrap module tqdm and provide new members to make the progress change more smoothly when the unit size is not equivalent and keep unknown in some time and need to predict. Using simple algorithm. For example, to download 100 picture from the website, you create 10 threads to do this, you set the origin total to 100 and never know the true size of the picture you have not read in.
+
+```python
+import requests
+from sine.utils import *
+bar=PredictableProcessBar(total=100)
+
+def download_pic(url, path, bar):
+    with closing(requests.get(url, stream=True)) as resp:
+        size = int(resp.headers['Content-Length'])
+        # you now know the true 'size' of one of origin total size in the bar, call this for adjust the true process and help to prediction
+        bar.load_in(size, 1)
+        with open(path, 'wb') as code:
+            for chunk in resp.iter_content(chunk_size=1024*1024): # buffer size: 1MB
+                code.write(chunk)
+                # send the true size just for log, and the origin size for update, and optional the core cost time for log
+                bar.update_out(len(chunk), len(chunk)/size)
+                bar.set_postfix_str(byte2readable(bar.loaded_avg * bar.n / (time.time() - bar.start_t)) + '/s')
+
+```
+
+
 ### Class EventManager
 
 provide event sending and listening.
@@ -11,7 +53,7 @@ use a hashable key to identify an event.
 
 ```python
 def f(key, data):
-    print data
+    print(data)
 
 manager = EventManager()
 manager.start() # start listen
@@ -158,6 +200,11 @@ storage.compress()
 ```
 
 ## Change Log
+
+### v0.2.1, 2021-12-26
+
+* [fix] using Thread.is_alive instead of Thread.isAlive (not found)
+* [fix] bugs in PredictableProcessBar
 
 ### v0.2.0, 2021-12-26
 

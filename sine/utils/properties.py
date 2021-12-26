@@ -32,7 +32,7 @@ import re
 import sys
 
 # 兼容 python3
-if sys.version_info.major == 3:
+if sys.version_info.major >= 3:
     def hasNext(o):
         return hasattr(o, '__next__')
     xrange = range

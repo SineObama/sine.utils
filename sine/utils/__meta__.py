@@ -5,7 +5,7 @@
 #      ""b    88    88   i 88   88
 #  "booodP    88    88    i88   888888
 
-_VERSION = (0, 2, 0)
+_VERSION = (0, 2, 1)
 
 DESCRIPTION = 'the set of common tools'
 URL = 'https://github.com/SineObama/'
